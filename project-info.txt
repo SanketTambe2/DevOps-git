@@ -1,0 +1,33 @@
+# Private EC2 to S3 using VPC Gateway Endpoint
+
+This Terraform project provisions a secure AWS infrastructure where EC2 instances access S3 buckets **privately**, without using the public internet. It uses a **VPC Gateway Endpoint** to route traffic directly through the AWS internal network.
+
+## 📌 Key Features
+- Custom VPC and private subnet
+- EC2 instance without public IP
+- VPC Gateway Endpoint for S3 access
+- IAM role with least privilege to access specific S3 bucket
+- Fully automated using Infrastructure as Code (Terraform)
+- No NAT Gateway or Internet Gateway needed for S3 access
+
+## 📦 Resources Used
+
+| Resource Type            | Terraform Resource Name                          | Purpose                                      |
+|--------------------------|--------------------------------------------------|----------------------------------------------|
+| VPC                      | `aws_vpc.secure_vpc`                             | Custom virtual private cloud                 |
+| Subnet                   | `aws_subnet.app_subnet`                          | Private subnet for EC2                       |
+| Route Table              | `aws_route_table.app_route_table`        	      | Controls subnet routing                      |
+| Route Association        | `aws_route_table_association.subnet_route_assoc` | Links subnet to route table         	     |
+| VPC Endpoint             | `aws_vpc_endpoint.s3_gateway_endpoint`   	      | Enables private access to S3                 |
+| IAM Role                 | `aws_iam_role.ec2_to_s3_role`            	      | Grants EC2 permissions to access S3          |
+| IAM Policy               | `aws_iam_role_policy.s3_read_policy`     	      | Defines S3 read-only access                  |
+| Instance Profile         | `aws_iam_instance_profile.ec2_iam_profile`       | Binds IAM role to EC2 instance               |
+| EC2 Instance             | `aws_instance.web_instance`                      | Amazon Linux instance in private subnet      |
+
+## 🚀 How to Deploy
+
+```Git Bash
+terraform init
+terraform plan  -var="bucket_name=your-bucket-name"       if need to see ( blue print of Project )
+terraform apply -var="bucket_name=your-bucket-name"	   
+
