@@ -1,0 +1,77 @@
+locals {
+  project_title = "🔒 Secure EC2 to S3 Communication via Private VPC Endpoint"
+  author        = "👨‍💻 Sanket Tambe"
+
+  description = <<DESCRIPTION
+This Terraform project provisions a secure and scalable AWS infrastructure where private EC2 instances 
+access an S3 bucket without touching the public internet. It uses a VPC Gateway Endpoint to ensure 
+traffic remains within AWS's internal network — perfect for production-grade systems.
+DESCRIPTION
+
+  main_features = [
+    "🌐 Custom VPC with public and private subnets (multi-AZ)",
+    "🛠️ EC2 instance with no public IP in private subnet",
+    "🔐 IAM role with least privilege to access S3 bucket",
+    "🚪 VPC Gateway Endpoint for secure S3 access",
+    "📦 S3 bucket name provided dynamically via variable",
+    "❌ No NAT Gateway required for S3 access",
+    "✅ Fully automated using Terraform"
+  ]
+
+  terraform_files = [
+    "📄 provider.tf – AWS provider configuration",
+    "📄 vpc.tf – VPC, subnets, route tables, IGW, NAT GW",
+    "📄 ec2.tf – Public and private EC2 instances",
+    "📄 s3.tf – S3 bucket and VPC endpoint resources",
+    "📄 variables.tf – Input variables (bucket, region, etc)",
+    "📄 outputs.tf – Shows VPC ID, EC2 IPs, S3 bucket name"
+  ]
+
+
+   ## 📦 Resources Used
+
+| Resource Type            | Terraform Resource Name                  	      | Purpose                                      |
+|--------------------------|--------------------------------------------------|----------------------------------------------|
+| VPC                      | `aws_vpc.secure_vpc`                     	      | Custom virtual private cloud                 |
+| Subnet                   | `aws_subnet.app_subnet`                          | Private subnet for EC2                       |
+| Route Table              | `aws_route_table.app_route_table`        	      | Controls subnet routing                      |
+| Route Association        | `aws_route_table_association.subnet_route_assoc` | Links subnet to route table                  |
+| VPC Endpoint             | `aws_vpc_endpoint.s3_gateway_endpoint`   	      | Enables private access to S3                 |
+| IAM Role                 | `aws_iam_role.ec2_to_s3_role`       	      | Grants EC2 permissions to access S3          |
+| IAM Policy               | `aws_iam_role_policy.s3_read_policy`	      | Defines S3 read-only access                  |
+| Instance Profile         | `aws_iam_instance_profile.ec2_iam_profile`       | Binds IAM role to EC2 instance               |
+| EC2 Instance             | `aws_instance.web_instance`                      | Amazon Linux instance in private subnet      |
+
+
+
+  run_steps = <<STEPS
+🚀 HOW TO DEPLOY
+
+1️⃣ Open your terminal (Git Bash or similar)  
+2️⃣ Navigate to the project directory:  
+    cd /path/to/project  
+3️⃣ Generate SSH key (if needed):  
+    ssh-keygen  
+    cat ~/.ssh/id_ed25519.pub  
+
+4️⃣ Deploy the infrastructure:  
+    terraform init  
+    terraform plan  
+    terraform apply -var="bucket_name=your-bucket-name"
+STEPS
+
+  git_instructions = <<GIT
+📦 GITHUB INTEGRATION
+
+1️⃣ Initialize Git in your project:  
+    git init  
+
+2️⃣ Push to GitHub:  
+    git clone https://github.com/<your-username>/secure-ec2-s3-project.git  
+    git add .  
+    git commit -m "Initial secure EC2 to S3 project setup"  
+    git push origin main
+GIT
+}
+
+
