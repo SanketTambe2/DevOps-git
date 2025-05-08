@@ -10,3 +10,4 @@ resource "aws_vpc_endpoint" "s3" {
   }
 }
 
+

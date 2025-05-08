@@ -1,6 +1,8 @@
 # VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.10.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
   tags = { Name = "My-Vpc" }
 }
 
@@ -30,19 +32,27 @@ resource "aws_security_group" "public_sg" {
 # Security Group for Private EC2 (allow SSH inbound)
 resource "aws_security_group" "private_sg" {
   vpc_id = aws_vpc.main.id
-  egress {
-    cidr_blocks = ["0.0.0.0/0"]
-    from_port   = 0
-    to_port     = 0
-    protocol    = "tcp"
-  }
-
   ingress {
-    cidr_blocks = ["0.0.0.0/0"]
+    protocol    = "tcp"
     from_port   = 22
     to_port     = 22
-    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
 
   tags = { Name = "Private-SG" }
 }
