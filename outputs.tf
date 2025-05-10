@@ -18,12 +18,12 @@ output "private_subnet_id" {
 # EC2 Instances
 output "public_ec2_public_ip" {
   description = "Public IP of the public EC2 instance"
-  value       = aws_instance.public_ec2.public_ip
+  value       = aws_instance.public_instance_1.public_ip
 }
 
 output "private_ec2_private_ip" {
   description = "Private IP of the private EC2 instance"
-  value       = aws_instance.private_ec2.private_ip
+  value       = aws_instance.private_instance_1.private_ip
 }
 
 # S3 Bucket
@@ -43,4 +43,5 @@ output "vpc_s3_endpoint_id" {
   description = "VPC Gateway Endpoint for S3"
   value       = aws_vpc_endpoint.s3.id
 }
+
 

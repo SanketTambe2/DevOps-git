@@ -1,12 +1,10 @@
 # VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.10.0.0/16"
-  enable_dns_support   = true
-  enable_dns_hostnames = true
   tags = { Name = "My-Vpc" }
 }
 
-# Public Subnet
+# Public Subnet (Only 1 public subnet)
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.10.1.0/24"
@@ -15,7 +13,7 @@ resource "aws_subnet" "public" {
   tags                    = { Name = "Public-Subnet-1" }
 }
 
-# Private Subnet
+# Private Subnet (Only 1 private subnet)
 resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.10.3.0/24"
@@ -24,89 +22,69 @@ resource "aws_subnet" "private" {
 }
 
 # Security Groups
-resource "aws_security_group" "public_sg" {
+resource "aws_security_group" "public_sg_vpc" {
   vpc_id = aws_vpc.main.id
   tags   = { Name = "Public-SG" }
 }
 
-# Security Group for Private EC2 (allow SSH inbound)
-resource "aws_security_group" "private_sg" {
+resource "aws_security_group" "private_sg_vpc" {
   vpc_id = aws_vpc.main.id
-  ingress {
-    protocol    = "tcp"
-    from_port   = 22
-    to_port     = 22
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-
-  tags = { Name = "Private-SG" }
+  tags   = { Name = "Private-SG" }
 }
 
 # Internet Gateway
 resource "aws_internet_gateway" "my-IGW" {
-  vpc_id = aws_vpc.main.id
-  tags   = { Name = "My-IGW" }
+  vpc_id    = aws_vpc.main.id
+  tags      = { Name = "My-IGW" }
 }
 
-# Public Route Table
+# Route-Table for Public Subnet
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
-  tags   = { Name = "MRT" }
+  vpc_id      = aws_vpc.main.id
+  tags        = { Name = "Public-RT" }
 }
 
+# Edit-Routes for Public Route Table
 resource "aws_route" "public_internet_access" {
   route_table_id         = aws_route_table.public.id
-  destination_cidr_block = "0.0.0.0/0"
+  destination_cidr_block = "0.0.0.0/0"  # Default route for internet traffic
   gateway_id             = aws_internet_gateway.my-IGW.id
 }
 
+# Subnet Association for Public Subnet
 resource "aws_route_table_association" "public_assoc" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
 }
 
-# Elastic IP for NAT Gateway
+# Allocate an Elastic IP for the NAT Gateway
 resource "aws_eip" "nat_eip" {
   domain = "vpc"
   tags = { Name = "NAT-EIP" }
 }
 
-# NAT Gateway
+# Create the NAT Gateway in the Public Subnet
 resource "aws_nat_gateway" "nat_gw" {
   allocation_id = aws_eip.nat_eip.id
   subnet_id     = aws_subnet.public.id
-
-  tags = { Name = "NAT-Gateway" }
-  depends_on = [aws_internet_gateway.my-IGW]
+  tags          = { Name = "NAT-Gateway" }
+  depends_on    = [aws_internet_gateway.my-IGW]
 }
 
 # Private Route Table
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
-  tags   = { Name = "CRT" }
+  tags   = { Name = "Private-RT" }
 }
 
+# Edit-Routes for Private Route Table (via NAT Gateway)
 resource "aws_route" "private_nat_route" {
   route_table_id         = aws_route_table.private.id
-  destination_cidr_block = "0.0.0.0/0"
+  destination_cidr_block = "0.0.0.0/0"  # Default route for internet traffic
   nat_gateway_id         = aws_nat_gateway.nat_gw.id
 }
 
+# Subnet Association for Private Subnet
 resource "aws_route_table_association" "private_assoc" {
   subnet_id      = aws_subnet.private.id
   route_table_id = aws_route_table.private.id
